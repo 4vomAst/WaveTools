@@ -1,99 +1,20 @@
-﻿using System.Text.RegularExpressions;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
 namespace Waver;
 
-public static class Resampler
+public class Resampler : ResampleBase
 {
-    private const string Wildcard = "*";
-    private const string WildcardRegEx = @"[\*]";
-    
-    public static void ResampleFiles(ResampleOptions resampleOptions)
+    public void ResampleFiles(ResampleOptions resampleOptions)
     {
         foreach (var inputFileName in GetInputFileNames(resampleOptions.InputFileMask))
         {
-            ResampleFile(inputFileName, 
-                GetOutputFileName(inputFileName, resampleOptions.OutputFileMask), 
+            ResampleFile(inputFileName, GetOutputFileName(inputFileName, resampleOptions.OutputFileMask), 
                 resampleOptions);
         }
     }
 
-    public static IEnumerable<string> GetInputFileNames(string inputFileMask)
-    {
-        if (string.IsNullOrEmpty(inputFileMask))
-        {
-            throw new ArgumentException("Input file mask is null or empty.");
-        }
-        
-        if (File.Exists(inputFileMask) && !Directory.Exists(inputFileMask))
-        {
-            return new List<string>() { inputFileMask };
-        }
-
-        string directory;
-        var searchPattern = Wildcard;
-
-        if (Directory.Exists(inputFileMask))
-        {
-            directory = inputFileMask;
-        }
-        else
-        {
-            directory = Path.GetDirectoryName(inputFileMask) ?? Directory.GetCurrentDirectory();
-        
-            searchPattern = Path.GetFileName(inputFileMask);
-        }
-
-        var fileList = Directory.EnumerateFiles(directory, searchPattern).ToList();
-
-        if (fileList == null || !fileList.Any()) throw new FileNotFoundException("No input file found.", inputFileMask) ;
-        
-        return fileList;
-    }
-
-    public static string GetOutputFileName(string inputFileName, string outputFileMask)
-    {
-        if (string.IsNullOrEmpty(inputFileName))
-        {
-            throw new ArgumentException("Input file name is null or empty");
-        }
-        
-        if (string.IsNullOrEmpty(outputFileMask))
-        {
-            throw new ArgumentException("Output file mask is null or empty");
-        }
-
-        if (!File.Exists(inputFileName))
-        {
-            throw new FileNotFoundException($"Input file not found.", inputFileName);
-        }
-        
-        if (Directory.Exists(outputFileMask))
-        {
-            return Path.Combine(outputFileMask, Path.GetFileName(inputFileName));
-        }
-
-        if (!ContainsWildcard(outputFileMask))
-        {
-            return outputFileMask;
-        }
-
-        return outputFileMask.Replace(Wildcard, Path.GetFileNameWithoutExtension(inputFileName));
-    }
-
-    public static bool ContainsWildcard(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return false;
-        
-        var matchCount = Regex.Matches(input, WildcardRegEx).Count;
-
-        if (matchCount > 1) throw new ArgumentException($"{input} contains multiple wildcards");
-
-        return matchCount == 1;
-    }
-
-    private static void ResampleFile(string inputFileName, string outputFileName, ResampleOptions resampleOptions)
+    private void ResampleFile(string inputFileName, string outputFileName, ResampleOptions resampleOptions)
     {
         if (!resampleOptions.Force && File.Exists(outputFileName))
         {
@@ -116,7 +37,6 @@ public static class Resampler
             sampleProvider = resamplingSampleProvider;
         }
         
-        //WaveFileWriter.CreateWaveFile16(outputFileName, sampleProvider);
         WaveFileWriter.CreateWaveFile16(outputFileName, sampleProvider);
 
         if (!resampleOptions.Verbose) return;
@@ -134,13 +54,4 @@ public static class Resampler
         }
     }
     
-    public static void ConvertFiles(ConvertOptions options)
-    {
-        
-    }
-    
-    public static void ConcatFiles(ConcatOptions options)
-    {
-        
-    }
 }

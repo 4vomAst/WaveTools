@@ -1,18 +1,24 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-using CommandLine;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+﻿using CommandLine;
 using Waver;
 
 try
 {
     Parser.Default.ParseArguments<ResampleOptions, ConvertOptions, ConcatOptions>(args)
-        .WithParsed<ResampleOptions>(Resampler.ResampleFiles)
-        .WithParsed<ConvertOptions>(Resampler.ConvertFiles)
-        .WithParsed<ConcatOptions>(Resampler.ConcatFiles);
-
+        .WithParsed<ResampleOptions>(options =>
+        {
+            var resample = new Resampler();
+            resample.ResampleFiles(options);
+        })
+        .WithParsed<ConvertOptions>(options =>
+        {
+            var convert = new Converter();
+            convert.ConvertFiles(options);
+        })
+        .WithParsed<ConcatOptions>(options =>
+        {
+            var dummy = new Concater();
+            dummy.ConcatFiles(options);
+        });
 }
 catch (FileNotFoundException ex)
 {
@@ -22,15 +28,3 @@ catch (ArgumentException ex)
 {
     Console.WriteLine($"{ex.Message}");
 }
-
-
-// using var reader = new AudioFileReader("input.wav");
-//
-// var sampleProvider = new WdlResamplingSampleProvider(reader, 48000);
-//
-// if (sampleProvider.WaveFormat.Channels == 2)
-// {
-//     var mono = new StereoToMonoSampleProvider(sampleProvider);
-// }
-//
-// WaveFileWriter.CreateWaveFile16("blah", sampleProvider);

@@ -2,7 +2,7 @@
 
 namespace Waver;
 
-[Verb("resample", HelpText = "Resample audio files to 16bit wav")]
+[Verb("resample", HelpText = "Resample audio files (wav, mp3) to 16bit wav")]
 public class ResampleOptions : CommonOptions
 {
     [Option('m', "mono", Required = false, HelpText = "Output to mono file", Default = false)]
