@@ -86,36 +86,38 @@ public class ResamplerTests
     [Test]
     public void FileNameTests()
     {
-        Assert.That(Resampler.ContainsWildcard(null!), Is.False);
-        Assert.That(Resampler.ContainsWildcard(""), Is.False);
-        Assert.That(Resampler.ContainsWildcard("output.pcm"), Is.False);
-        Assert.That(Resampler.ContainsWildcard("test_*.pcm"), Is.True);
-        Assert.Throws<ArgumentException>(() => Resampler.ContainsWildcard("test_*_*.pcm"));
+        Assert.That(ResampleBase.ContainsWildcard(null!), Is.False);
+        Assert.That(ResampleBase.ContainsWildcard(""), Is.False);
+        Assert.That(ResampleBase.ContainsWildcard("output.pcm"), Is.False);
+        Assert.That(ResampleBase.ContainsWildcard("test_*.pcm"), Is.True);
+        Assert.Throws<ArgumentException>(() => ResampleBase.ContainsWildcard("test_*_*.pcm"));
 
-        Assert.Throws<ArgumentException>(() => Resampler.GetInputFileNames(""));
-        Assert.Throws<ArgumentException>(() => Resampler.GetInputFileNames(null!));
-        Assert.Throws<FileNotFoundException>(() => Resampler.GetInputFileNames(_tempEmptyInputDir));
-        Assert.Throws<FileNotFoundException>(() => Resampler.GetInputFileNames(Path.Combine(_tempInputDir, "*.mp3")));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetInputFileNames(""));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetInputFileNames(null!));
+        Assert.Throws<FileNotFoundException>(() => ResampleBase.GetInputFileNames(_tempEmptyInputDir));
+        Assert.Throws<FileNotFoundException>(() => ResampleBase.GetInputFileNames(Path.Combine(_tempInputDir, "*.mp3")));
 
-        Assert.That(Resampler.GetInputFileNames(_tempInputFile1).Count(), Is.EqualTo(1));
-        Assert.That(Resampler.GetInputFileNames(Path.GetTempPath()).Count(), Is.GreaterThan(1));
-        Assert.That(Resampler.GetInputFileNames(_tempInputDir).Count(), Is.EqualTo(2));
-        Assert.That(Resampler.GetInputFileNames(Path.Combine(_tempInputDir, "*.wav")).Count(), Is.EqualTo(2));
+        Assert.That(ResampleBase.GetInputFileNames(_tempInputFile1).Count(), Is.EqualTo(1));
+        Assert.That(ResampleBase.GetInputFileNames(Path.GetTempPath()).Count(), Is.GreaterThan(1));
+        Assert.That(ResampleBase.GetInputFileNames(_tempInputDir).Count(), Is.EqualTo(2));
+        Assert.That(ResampleBase.GetInputFileNames(Path.Combine(_tempInputDir, "*.wav")).Count(), Is.EqualTo(2));
 
-        Assert.Throws<ArgumentException>(() => Resampler.GetOutputFileName("", "any.wav"));
-        Assert.Throws<ArgumentException>(() => Resampler.GetOutputFileName(null!, "any.wav"));
-        Assert.Throws<ArgumentException>(() => Resampler.GetOutputFileName(_tempInputFile1, ""));
-        Assert.Throws<ArgumentException>(() => Resampler.GetOutputFileName(_tempInputFile1, null!));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName("", "any.wav", "*.wav"));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(null!, "any.wav", "*.wav"));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "", "*.wav"));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, null!, "*.wav"));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "any.wav", ""));
+        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "any.wav", null!));
 
         Assert.Throws<FileNotFoundException>(() =>
-            Resampler.GetOutputFileName(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), ".wav"), "*.pcm"));
+            ResampleBase.GetOutputFileName(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), ".wav"), "*.pcm", "*.wav"));
 
-        Assert.That(Resampler.GetOutputFileName(_tempInputFile1, "output.pcm"), Is.EqualTo("output.pcm"));
-        Assert.That(Resampler.GetOutputFileName(_tempInputFile1, _tempOutputDir),
-            Is.EqualTo(Path.Combine(_tempOutputDir, Path.GetFileName(_tempInputFile1))));
-        Assert.That(Resampler.GetOutputFileName(_tempInputFile1, "*.pcm"),
+        Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, "output.pcm", ".wav"), Is.EqualTo("output.wav"));
+        Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, _tempOutputDir, ".wav"),
+            Is.EqualTo(Path.Combine(_tempOutputDir, Path.GetFileNameWithoutExtension(_tempInputFile1), ".wav")));
+        Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, "*.pcm", ".wav"),
             Is.EqualTo(Path.GetFileName(_tempInputFile1).Replace(".tmp", ".pcm")));
-        Assert.That(Resampler.GetOutputFileName(_tempInputFile1, Path.Combine(_tempOutputDir, "*.pcm")),
+        Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, Path.Combine(_tempOutputDir, "*.pcm"), ".wav"),
             Is.EqualTo(Path.Combine(_tempOutputDir, Path.GetFileName(_tempInputFile1).Replace(".tmp", ".pcm"))));
     }
 }

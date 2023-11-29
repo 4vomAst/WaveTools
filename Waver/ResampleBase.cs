@@ -40,7 +40,7 @@ public class ResampleBase
         return fileList;
     }
 
-    public static string GetOutputFileName(string inputFileName, string outputFileMask)
+    public static string GetOutputFileName(string inputFileName, string outputFileMask, string defaultExtension)
     {
         if (string.IsNullOrEmpty(inputFileName))
         {
@@ -52,6 +52,11 @@ public class ResampleBase
             throw new ArgumentException("Output file mask is null or empty");
         }
 
+        if (string.IsNullOrEmpty(defaultExtension))
+        {
+            throw new ArgumentException("Extension is null or empty");
+        }
+
         if (!File.Exists(inputFileName))
         {
             throw new FileNotFoundException($"Input file not found.", inputFileName);
@@ -59,12 +64,12 @@ public class ResampleBase
         
         if (Directory.Exists(outputFileMask))
         {
-            return Path.Combine(outputFileMask, Path.GetFileName(inputFileName));
+            return Path.Combine(outputFileMask, Path.GetFileNameWithoutExtension(inputFileName), defaultExtension);
         }
 
         if (!ContainsWildcard(outputFileMask))
         {
-            return outputFileMask;
+            return $"{Path.GetFileNameWithoutExtension(outputFileMask)}{defaultExtension}";
         }
 
         return outputFileMask.Replace(Wildcard, Path.GetFileNameWithoutExtension(inputFileName));

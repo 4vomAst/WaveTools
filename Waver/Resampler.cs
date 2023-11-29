@@ -9,7 +9,7 @@ public class Resampler : ResampleBase
     {
         foreach (var inputFileName in GetInputFileNames(resampleOptions.InputFileMask))
         {
-            ResampleFile(inputFileName, GetOutputFileName(inputFileName, resampleOptions.OutputFileMask), 
+            ResampleFile(inputFileName, GetOutputFileName(inputFileName, resampleOptions.OutputFileMask, ".wav"), 
                 resampleOptions);
         }
     }
