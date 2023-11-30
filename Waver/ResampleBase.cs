@@ -2,10 +2,21 @@
 
 namespace Waver;
 
-public class ResampleBase
+public abstract class ResampleBase
 {
     private const string Wildcard = "*";
     private const string WildcardRegEx = @"[\*]";
+    
+    public void ProcessFiles(CommonOptions commonOptions, string defaultExtension)
+    {
+        foreach (var inputFileName in GetInputFileNames(commonOptions.InputFileMask))
+        {
+            ProcessFile(inputFileName, GetOutputFileName(inputFileName, commonOptions.OutputFileMask, defaultExtension), 
+                commonOptions);
+        }
+    }
+
+    protected abstract void ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions);
     
     public static IEnumerable<string> GetInputFileNames(string inputFileMask)
     {

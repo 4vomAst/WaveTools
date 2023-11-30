@@ -5,16 +5,7 @@ namespace Waver;
 
 public class Resampler : ResampleBase
 {
-    public void ResampleFiles(ResampleOptions resampleOptions)
-    {
-        foreach (var inputFileName in GetInputFileNames(resampleOptions.InputFileMask))
-        {
-            ResampleFile(inputFileName, GetOutputFileName(inputFileName, resampleOptions.OutputFileMask, ".wav"), 
-                resampleOptions);
-        }
-    }
-
-    private void ResampleFile(string inputFileName, string outputFileName, ResampleOptions resampleOptions)
+    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions)
     {
         if (!resampleOptions.Force && File.Exists(outputFileName))
         {
@@ -23,7 +14,6 @@ public class Resampler : ResampleBase
         }
         
         using var reader = new AudioFileReader(inputFileName);
-
         var resamplingSampleProvider = new WdlResamplingSampleProvider(reader, resampleOptions.SampleRate);
 
         ISampleProvider sampleProvider;
