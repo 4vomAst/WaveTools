@@ -3,16 +3,24 @@ using Waver;
 
 try
 {
-    Parser.Default.ParseArguments<ResampleOptions, ConvertOptions, ConcatOptions>(args)
+    Parser.Default.ParseArguments<ResampleOptions, 
+            ConvertRawToWavOptions, 
+            ConvertWavToRawOptions, 
+            ConcatOptions>(args)
         .WithParsed<ResampleOptions>(options =>
         {
             var resample = new Resampler();
             resample.ResampleFiles(options);
         })
-        .WithParsed<ConvertOptions>(options =>
+        .WithParsed<ConvertRawToWavOptions>(options =>
         {
             var convert = new Converter();
-            convert.ConvertFiles(options);
+            convert.ConvertPcmToWavFiles(options);
+        })
+        .WithParsed<ConvertWavToRawOptions>(options =>
+        {
+            var convert = new Converter();
+            convert.ConvertWavToPcmFiles(options);
         })
         .WithParsed<ConcatOptions>(options =>
         {
