@@ -114,7 +114,7 @@ public class ResamplerTests
 
         Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, "output.pcm", ".wav"), Is.EqualTo("output.wav"));
         Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, _tempOutputDir, ".wav"),
-            Is.EqualTo(Path.Combine(_tempOutputDir, Path.GetFileNameWithoutExtension(_tempInputFile1), ".wav")));
+            Is.EqualTo(Path.Combine(_tempOutputDir, $"{Path.GetFileNameWithoutExtension(_tempInputFile1)}.wav")));
         Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, "*.pcm", ".wav"),
             Is.EqualTo(Path.GetFileName(_tempInputFile1).Replace(".tmp", ".pcm")));
         Assert.That(ResampleBase.GetOutputFileName(_tempInputFile1, Path.Combine(_tempOutputDir, "*.pcm"), ".wav"),

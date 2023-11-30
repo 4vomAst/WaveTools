@@ -75,7 +75,7 @@ public abstract class ResampleBase
         
         if (Directory.Exists(outputFileMask))
         {
-            return Path.Combine(outputFileMask, Path.GetFileNameWithoutExtension(inputFileName), defaultExtension);
+            return Path.Combine(outputFileMask, $"{Path.GetFileNameWithoutExtension(inputFileName)}{defaultExtension}");
         }
 
         if (!ContainsWildcard(outputFileMask))
