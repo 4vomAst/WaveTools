@@ -80,7 +80,11 @@ public abstract class ResampleBase
 
         if (!ContainsWildcard(outputFileMask))
         {
-            return $"{Path.GetFileNameWithoutExtension(outputFileMask)}{defaultExtension}";
+            var directory = Path.GetDirectoryName(outputFileMask);
+            var filename = $"{Path.GetFileNameWithoutExtension(outputFileMask)}{defaultExtension}";
+
+            return string.IsNullOrEmpty(directory) ? filename : Path.Combine(directory, filename);
+            
         }
 
         return outputFileMask.Replace(Wildcard, Path.GetFileNameWithoutExtension(inputFileName));

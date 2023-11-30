@@ -15,17 +15,17 @@ try
         .WithParsed<ConvertRawToWavOptions>(options =>
         {
             var convert = new RawToWavConverter();
-            convert.ProcessFiles(options, "*.wav");
+            convert.ProcessFiles(options, ".wav");
         })
         .WithParsed<ConvertWavToRawOptions>(options =>
         {
             var convert = new WavToRawConverter();
-            convert.ProcessFiles(options, "*.raw");
+            convert.ProcessFiles(options, ".raw");
         })
         .WithParsed<ConcatOptions>(options =>
         {
             var rawConcater = new RawConcater();
-            rawConcater.ProcessFiles(options, "*.raw");
+            rawConcater.ProcessFiles(options, ".raw");
         });
 }
 catch (FileNotFoundException ex)
