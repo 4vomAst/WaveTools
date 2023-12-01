@@ -58,14 +58,14 @@ public abstract class ResampleBase
             throw new ArgumentException("Input file name is null or empty");
         }
         
-        if (string.IsNullOrEmpty(outputFileMask))
-        {
-            throw new ArgumentException("Output file mask is null or empty");
-        }
-
         if (string.IsNullOrEmpty(defaultExtension))
         {
-            throw new ArgumentException("Extension is null or empty");
+            defaultExtension = ".wav";
+        }
+
+        if (string.IsNullOrEmpty(outputFileMask))
+        {
+            outputFileMask = $"*{defaultExtension}";
         }
 
         if (!File.Exists(inputFileName))

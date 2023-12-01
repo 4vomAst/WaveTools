@@ -3,7 +3,8 @@ using Waver;
 
 try
 {
-    Parser.Default.ParseArguments<ResampleOptions, 
+    Parser.Default.ParseArguments<ResampleOptions,
+            AnalyzeOptions,
             ConvertRawToWavOptions, 
             ConvertWavToRawOptions, 
             ConcatOptions>(args)
@@ -11,6 +12,11 @@ try
         {
             var resample = new Resampler();
             resample.ProcessFiles(options, ".wav");
+        })
+        .WithParsed<AnalyzeOptions>(options =>
+        {
+            var convert = new Analyzer();
+            convert.ProcessFiles(options, ".raw");
         })
         .WithParsed<ConvertRawToWavOptions>(options =>
         {

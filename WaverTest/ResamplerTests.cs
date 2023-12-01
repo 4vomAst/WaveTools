@@ -104,10 +104,6 @@ public class ResamplerTests
 
         Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName("", "any.wav", "*.wav"));
         Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(null!, "any.wav", "*.wav"));
-        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "", "*.wav"));
-        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, null!, "*.wav"));
-        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "any.wav", ""));
-        Assert.Throws<ArgumentException>(() => ResampleBase.GetOutputFileName(_tempInputFile1, "any.wav", null!));
 
         Assert.Throws<FileNotFoundException>(() =>
             ResampleBase.GetOutputFileName(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), ".wav"), "*.pcm", "*.wav"));

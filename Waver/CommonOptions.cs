@@ -16,7 +16,7 @@ public class CommonOptions
                    """)]
     public string InputFileMask { get; set; }
     
-    [Option('o', "output", Required = true, 
+    [Option('o', "output", Required = false, 
         HelpText = """
                    Output filename or mask. Examples: "c:\test\test.pcm", "c:\test\*.pcm", "c:\test", "test.pcm", "*.pcm".
                    """)]
