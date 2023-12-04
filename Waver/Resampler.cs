@@ -7,13 +7,57 @@ public class Resampler : ResampleBase
 {
     protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions)
     {
+        //verify if output file already exists
         if (!resampleOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
             return;
         }
         
+        //convert wav or mp3 file to 16bit wav file with given sample rate and channel count (mono / stereo)
         using var reader = new AudioFileReader(inputFileName);
+        
+        if (resampleOptions.Nomalization.HasValue)
+        {
+            if (resampleOptions.Nomalization.Value <= 0)
+            {
+                // find the max peak
+                var buffer = new float[reader.WaveFormat.SampleRate];
+                int read;
+                var maxSampleValue = 0.0f;
+                do
+                {
+                    read = reader.Read(buffer, 0, buffer.Length);
+                    for (var n = 0; n < read; n++)
+                    {
+                        var abs = Math.Abs(buffer[n]);
+                        if (abs < maxSampleValue) continue;
+                        maxSampleValue = abs;
+                    }
+                } while (read > 0);
+
+                reader.Position = 0;
+
+                if (maxSampleValue > 0.0f && maxSampleValue < 1.0f)
+                {
+                    var maxRequestedSampleValue = Math.Pow(10, resampleOptions.Nomalization.Value / 20f);
+                    var volumeFactor = (float)maxRequestedSampleValue / maxSampleValue;
+                    
+                    reader.Volume = volumeFactor;
+                    
+                    Console.WriteLine($"Max sample value: {maxSampleValue}, {resampleOptions.Nomalization.Value} dB = {maxRequestedSampleValue} -> set volume to {volumeFactor}");
+                }
+                else
+                {
+                    Console.WriteLine($"Max sample value: {maxSampleValue}, do not normalize");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Skip normalization, invalid db level {resampleOptions.Nomalization.Value}, must be <= 0.");
+            }
+        }
+        
         var resamplingSampleProvider = new WdlResamplingSampleProvider(reader, resampleOptions.SampleRate);
 
         ISampleProvider sampleProvider;
@@ -29,9 +73,11 @@ public class Resampler : ResampleBase
         
         WaveFileWriter.CreateWaveFile16(outputFileName, sampleProvider);
 
-        if (!resampleOptions.Verbose) return;
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
+        if (!resampleOptions.Verbose) return;
+
+        //verify correct format of written file
         try
         {
             var waveReader = new WaveFileReader(outputFileName);

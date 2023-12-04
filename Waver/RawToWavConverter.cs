@@ -12,15 +12,20 @@ public class RawToWavConverter : ResampleBase
             return;
         }
         
+        //convert raw pcm file to wav
         using(var fileStream = File.OpenRead(inputFileName))
         {
-            var s = new RawSourceWaveStream(fileStream, 
+            var rawSourceWaveStream = new RawSourceWaveStream(fileStream, 
                 new WaveFormat(rawToWavOptions.SampleRate,rawToWavOptions.Mono ? 1 : 2));
-            WaveFileWriter.CreateWaveFile(outputFileName, s);
+            
+            WaveFileWriter.CreateWaveFile(outputFileName, rawSourceWaveStream);
         }        
         
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
+        if (!rawToWavOptions.Verbose) return;
+        
+        //verify correct format of written file
         try
         {
             var waveReader = new WaveFileReader(outputFileName);
