@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using NAudio.Wave;
 
 namespace Waver;
 
@@ -99,5 +100,13 @@ public abstract class ResampleBase
         if (matchCount > 1) throw new ArgumentException($"{input} contains multiple wildcards");
 
         return matchCount == 1;
+    }
+
+    protected void PrintWaveFileFormat(string fileName)
+    {
+        var waveReader = new WaveFileReader(fileName);
+        var waveFormat = waveReader.WaveFormat;
+        Console.WriteLine($"{fileName}: {waveFormat.Channels} channel(s), {waveFormat.SampleRate} Hz, {waveFormat.BitsPerSample} bit/sample, {waveFormat.Encoding}");
+        
     }
 }

@@ -38,18 +38,20 @@ public class Resampler : ResampleBase
 
                 reader.Position = 0;
 
-                if (maxSampleValue > 0.0f && maxSampleValue < 1.0f)
+                if (maxSampleValue is > 0.0f and < 1.0f)
                 {
                     var maxRequestedSampleValue = Math.Pow(10, resampleOptions.Nomalization.Value / 20f);
                     var volumeFactor = (float)maxRequestedSampleValue / maxSampleValue;
                     
                     reader.Volume = volumeFactor;
                     
-                    Console.WriteLine($"Max sample value: {maxSampleValue}, {resampleOptions.Nomalization.Value} dB = {maxRequestedSampleValue} -> set volume to {volumeFactor}");
+                    if (resampleOptions.Verbose)
+                        Console.WriteLine($"Max sample value: {maxSampleValue}, {resampleOptions.Nomalization.Value} dB = {maxRequestedSampleValue} -> set volume to {volumeFactor}");
                 }
                 else
                 {
-                    Console.WriteLine($"Max sample value: {maxSampleValue}, do not normalize");
+                    if (resampleOptions.Verbose)
+                        Console.WriteLine($"Max sample value: {maxSampleValue}, do not normalize");
                 }
             }
             else
@@ -73,21 +75,12 @@ public class Resampler : ResampleBase
         
         WaveFileWriter.CreateWaveFile16(outputFileName, sampleProvider);
 
+
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
         if (!resampleOptions.Verbose) return;
-
-        //verify correct format of written file
-        try
-        {
-            var waveReader = new WaveFileReader(outputFileName);
-            var waveFormat = waveReader.WaveFormat;
-            Console.WriteLine($"  -> {waveFormat.Channels} channel(s), {waveFormat.SampleRate} Hz, {waveFormat.BitsPerSample} bit/sample, {waveFormat.Encoding}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        
+        PrintWaveFileFormat(outputFileName);
     }
     
 }

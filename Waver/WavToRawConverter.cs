@@ -22,7 +22,8 @@ public class WavToRawConverter : ResampleBase
             var bytes = new byte[conversionStream.Length];
             var bytesRead = conversionStream.Read(bytes, 0, bytes.Length);
             fileStream.Write(bytes, 0, bytesRead);
-            fileStream.Flush();        }
+            fileStream.Flush();        
+        }
 
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
     }

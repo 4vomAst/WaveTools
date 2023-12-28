@@ -25,16 +25,6 @@ public class RawToWavConverter : ResampleBase
 
         if (!rawToWavOptions.Verbose) return;
         
-        //verify correct format of written file
-        try
-        {
-            var waveReader = new WaveFileReader(outputFileName);
-            var waveFormat = waveReader.WaveFormat;
-            Console.WriteLine($"  -> {waveFormat.Channels} channel(s), {waveFormat.SampleRate} Hz, {waveFormat.BitsPerSample} bit/sample, {waveFormat.Encoding}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        PrintWaveFileFormat(outputFileName);
     }
 }
