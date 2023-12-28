@@ -102,7 +102,7 @@ public abstract class ResampleBase
         return matchCount == 1;
     }
 
-    protected void PrintWaveFileFormat(string fileName)
+    protected static void PrintWaveFileFormat(string fileName)
     {
         var waveReader = new WaveFileReader(fileName);
         var waveFormat = waveReader.WaveFormat;
