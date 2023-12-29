@@ -19,4 +19,6 @@ public class WaveOptions : OutputOptions
     [Option('c', "split_count", Required = false, HelpText = "Split output to split_count file(s) with split_duration (seconds)", Default = null)]
     public int? SplitCount { get; set; }
     
+    [Option('t', "trim", Required = false, HelpText = "Trim silence", Default = false)]
+    public bool Trim { get; set; }
 }

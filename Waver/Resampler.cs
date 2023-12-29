@@ -20,15 +20,13 @@ public class Resampler : ResampleBase
         
         ApplyNormalization(reader, waveOptions);
 
-        var sampleProvider = GetResamplingProvider(reader, waveOptions);
-
         if (waveOptions.SplitDuration != null)
         {
-            SplitWaveFile(inputFileName, outputFileName, sampleProvider, waveOptions, reader.TotalTime);
+            SplitWaveFile(inputFileName, outputFileName, reader, waveOptions);
         }
         else
         {
-            WriteWaveFile(inputFileName, outputFileName, sampleProvider, commonOptions);
+            WriteWaveFile(inputFileName, outputFileName, reader, waveOptions);
         }
     }
 }

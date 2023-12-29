@@ -117,32 +117,51 @@ public abstract class ResampleBase
         
     }
 
-    protected static void SplitWaveFile(string inputFileName, string outputFileName, ISampleProvider sampleProvider, WaveOptions waveOptions, TimeSpan totalDuration)
+    protected static void SplitWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, WaveOptions waveOptions)
     {
         var splitDuration = TimeSpan.FromSeconds(waveOptions.SplitDuration ?? 10);
-        var maxSplitCount = (int)Math.Ceiling(totalDuration.TotalSeconds / splitDuration.TotalSeconds);
+        var maxSplitCount = (int)Math.Ceiling(reader.TotalTime.TotalSeconds / splitDuration.TotalSeconds);
         var splitCount = Math.Min(waveOptions.SplitCount ?? maxSplitCount, maxSplitCount);
 
         for (var count = 0; count < splitCount; count++)
         {
             var extension = Path.GetExtension(outputFileName);
             var splitFileName = outputFileName.Replace(extension, $"_{count}{extension}");
-            WriteWaveFile(inputFileName, splitFileName, sampleProvider.Take(splitDuration), waveOptions);
+            WriteWaveFile(inputFileName, splitFileName, reader, waveOptions, splitDuration);
+            if (!reader.HasData()) break;
         }
     }
 
-    protected static void WriteWaveFile(string inputFileName, string outputFileName, ISampleProvider sampleProvider, CommonOptions resampleOptions)
+    protected static void WriteWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, WaveOptions waveOptions, TimeSpan? duration = null)
     {
-        WaveFileWriter.CreateWaveFile16(outputFileName, sampleProvider);
-        
+        var sampleProvider = GetResamplingProvider(reader, waveOptions);
+
+        if (waveOptions.Trim)
+        {
+            var silenceDuration = reader.GetSilenceDuration();
+            reader.Skip(silenceDuration);
+
+            if (waveOptions.Verbose)
+                Console.WriteLine($"Skip silence of {silenceDuration.TotalMilliseconds} ms");
+
+            if (!reader.HasData())
+            {
+                Console.WriteLine($"No audio left after skipping silence of {silenceDuration.TotalMilliseconds} ms");
+                return;
+            }
+        }
+
+        WaveFileWriter.CreateWaveFile16(outputFileName,
+            duration != null ? sampleProvider.Take(duration.Value) : sampleProvider);
+
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
-        if (!resampleOptions.Verbose) return;
+        if (!waveOptions.Verbose) return;
         
         PrintWaveFileFormat(outputFileName);
     }
 
-    protected static ISampleProvider GetResamplingProvider(ISampleProvider reader, WaveOptions resampleOptions)
+    private static ISampleProvider GetResamplingProvider(ISampleProvider reader, WaveOptions resampleOptions)
     {
         var resamplingSampleProvider = new WdlResamplingSampleProvider(reader, resampleOptions.SampleRate);
 
