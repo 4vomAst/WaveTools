@@ -4,9 +4,11 @@ namespace Waver;
 
 public class RawToWavConverter : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions rawToWavOptions)
+    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions commonOptions)
     {
-        if (!rawToWavOptions.Force && File.Exists(outputFileName))
+        if (commonOptions is not WaveOptions waveOptions) return;
+        
+        if (!waveOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
             return;
@@ -16,14 +18,14 @@ public class RawToWavConverter : ResampleBase
         using(var fileStream = File.OpenRead(inputFileName))
         {
             var rawSourceWaveStream = new RawSourceWaveStream(fileStream, 
-                new WaveFormat(rawToWavOptions.SampleRate,rawToWavOptions.Mono ? 1 : 2));
+                new WaveFormat(waveOptions.SampleRate,waveOptions.Mono ? 1 : 2));
             
             WaveFileWriter.CreateWaveFile(outputFileName, rawSourceWaveStream);
         }        
         
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
-        if (!rawToWavOptions.Verbose) return;
+        if (!commonOptions.Verbose) return;
         
         PrintWaveFileFormat(outputFileName);
     }

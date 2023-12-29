@@ -3,7 +3,7 @@
 public class RawConcater : ResampleBase
 {
     protected override void ProcessFile(string inputFileName, string outputFileName,
-        CommonOptions wavToRawOptions)
+        CommonOptions commonOptions)
     {
         using(var inputFileStream = File.OpenRead(inputFileName))
         using(var outputFileStream = File.Open(outputFileName, FileMode.Append))

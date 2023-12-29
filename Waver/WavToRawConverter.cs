@@ -5,10 +5,13 @@ namespace Waver;
 public class WavToRawConverter : ResampleBase
 {
     protected override void ProcessFile(string inputFileName, string outputFileName,
-        CommonOptions wavToRawOptions)
+        CommonOptions commonOptions)
     {
+        var outputOptions = commonOptions as OutputOptions;
+        if (outputOptions == null) return;
+        
         //verify if output file already exists
-        if (!wavToRawOptions.Force && File.Exists(outputFileName))
+        if (!outputOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
             return;

@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.VisualBasic;
 using NAudio.Wave;
 
 namespace Waver;
@@ -12,14 +13,14 @@ public abstract class ResampleBase
     {
         foreach (var inputFileName in GetInputFileNames(commonOptions.InputFileMask))
         {
-            ProcessFile(inputFileName, GetOutputFileName(inputFileName, commonOptions.OutputFileMask, defaultExtension), 
+            ProcessFile(inputFileName, GetOutputFileName(inputFileName, commonOptions as OutputOptions, defaultExtension), 
                 commonOptions);
         }
     }
 
     protected abstract void ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions);
     
-    public static IEnumerable<string> GetInputFileNames(string inputFileMask)
+    public static IEnumerable<string> GetInputFileNames(string? inputFileMask)
     {
         if (string.IsNullOrEmpty(inputFileMask))
         {
@@ -50,6 +51,11 @@ public abstract class ResampleBase
         if (fileList == null || !fileList.Any()) throw new FileNotFoundException("No input file found.", inputFileMask) ;
         
         return fileList;
+    }
+
+    private static string GetOutputFileName(string inputFileName, OutputOptions? outputOptions, string defaultExtension)
+    {
+        return GetOutputFileName(inputFileName, outputOptions?.OutputFileMask ?? string.Empty, defaultExtension);
     }
 
     public static string GetOutputFileName(string inputFileName, string outputFileMask, string defaultExtension)
