@@ -5,28 +5,31 @@ namespace Waver;
 
 public class Resampler : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions commonOptions)
+    protected override bool ProcessFile(string inputFileName, string outputFileName, 
+        CommonOptions commonOptions, int counter)
     {
-        if (commonOptions is not WaveOptions waveOptions) return;
+        if (commonOptions is not ResampleOptions resampleOptions) return false;
         //verify if output file already exists
-        if (!waveOptions.Force && File.Exists(outputFileName))
+        if (!resampleOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
-            return;
+            return true;
         }
         
         //convert wav or mp3 file to 16bit wav file with given sample rate and channel count (mono / stereo)
         using var reader = new AudioFileReader(inputFileName);
         
-        ApplyNormalization(reader, waveOptions);
+        ApplyNormalization(reader, resampleOptions);
 
-        if (waveOptions.SplitDuration != null)
+        if (resampleOptions.SplitDuration != null)
         {
-            SplitWaveFile(inputFileName, outputFileName, reader, waveOptions);
+            SplitWaveFile(inputFileName, outputFileName, reader, resampleOptions);
         }
         else
         {
-            WriteWaveFile(inputFileName, outputFileName, reader, waveOptions);
+            WriteWaveFile(inputFileName, outputFileName, reader, resampleOptions);
         }
+
+        return true;
     }
 }

@@ -4,14 +4,15 @@ namespace Waver;
 
 public class RawToWavConverter : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions commonOptions)
+    protected override bool ProcessFile(string inputFileName, string outputFileName, 
+        CommonOptions commonOptions, int counter)
     {
-        if (commonOptions is not WaveOptions waveOptions) return;
+        if (commonOptions is not CommonWaveOptions waveOptions) return false;
         
         if (!waveOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
-            return;
+            return true;
         }
         
         //convert raw pcm file to wav
@@ -25,8 +26,10 @@ public class RawToWavConverter : ResampleBase
         
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
-        if (!commonOptions.Verbose) return;
+        if (!commonOptions.Verbose) return true;
         
         PrintWaveFileFormat(outputFileName);
+
+        return true;
     }
 }

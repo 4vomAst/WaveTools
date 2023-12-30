@@ -4,17 +4,17 @@ namespace Waver;
 
 public class WavToRawConverter : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName,
-        CommonOptions commonOptions)
+    protected override bool ProcessFile(string inputFileName, string outputFileName,
+        CommonOptions commonOptions, int counter)
     {
-        var outputOptions = commonOptions as OutputOptions;
-        if (outputOptions == null) return;
+        var outputOptions = commonOptions as CommonOutputOptions;
+        if (outputOptions == null) return false;
         
         //verify if output file already exists
         if (!outputOptions.Force && File.Exists(outputFileName))
         {
             Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
-            return;
+            return true;
         }
         
         //convert wav file to raw 16bit pcm
@@ -29,5 +29,7 @@ public class WavToRawConverter : ResampleBase
         }
 
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
+
+        return true;
     }
 }

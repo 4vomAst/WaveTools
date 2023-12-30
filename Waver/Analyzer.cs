@@ -4,8 +4,10 @@ namespace Waver;
 
 public class Analyzer : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName, CommonOptions commonOptions)
+    protected override bool ProcessFile(string inputFileName, string outputFileName, CommonOptions commonOptions, int counter)
     {
         PrintWaveFileFormat(inputFileName);
+
+        return true;
     }
 }

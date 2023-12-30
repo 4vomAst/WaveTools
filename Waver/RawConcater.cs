@@ -2,9 +2,17 @@
 
 public class RawConcater : ResampleBase
 {
-    protected override void ProcessFile(string inputFileName, string outputFileName,
-        CommonOptions commonOptions)
+    protected override bool ProcessFile(string inputFileName, string outputFileName,
+        CommonOptions commonOptions, int counter)
     {
+        if (commonOptions is not CommonOutputOptions outputOptions) return false;
+
+        if ((counter == 0) && !outputOptions.Force && File.Exists(outputFileName))
+        {
+            Console.WriteLine($"Skip {inputFileName}, file exists: {outputFileName}");
+            return false;
+        }
+        
         using(var inputFileStream = File.OpenRead(inputFileName))
         using(var outputFileStream = File.Open(outputFileName, FileMode.Append))
         {
@@ -15,5 +23,7 @@ public class RawConcater : ResampleBase
         }        
         
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
+
+        return true;
     }
 }

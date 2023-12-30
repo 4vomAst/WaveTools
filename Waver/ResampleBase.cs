@@ -12,14 +12,17 @@ public abstract class ResampleBase
     
     public void ProcessFiles(CommonOptions commonOptions, string defaultExtension)
     {
+        var counter = 0;
         foreach (var inputFileName in GetInputFileNames(commonOptions.InputFileMask))
         {
-            ProcessFile(inputFileName, GetOutputFileName(inputFileName, commonOptions as OutputOptions, defaultExtension), 
-                commonOptions);
+            var proceed = ProcessFile(inputFileName, GetOutputFileName(inputFileName, commonOptions as CommonOutputOptions, defaultExtension), 
+                commonOptions, counter++);
+            
+            if (!proceed) break;
         }
     }
 
-    protected abstract void ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions);
+    protected abstract bool ProcessFile(string inputFileName, string outputFileName, CommonOptions resampleOptions, int counter);
     
     public static IEnumerable<string> GetInputFileNames(string? inputFileMask)
     {
@@ -54,7 +57,7 @@ public abstract class ResampleBase
         return fileList;
     }
 
-    private static string GetOutputFileName(string inputFileName, OutputOptions? outputOptions, string defaultExtension)
+    private static string GetOutputFileName(string inputFileName, CommonOutputOptions? outputOptions, string defaultExtension)
     {
         return GetOutputFileName(inputFileName, outputOptions?.OutputFileMask ?? string.Empty, defaultExtension);
     }
@@ -117,31 +120,31 @@ public abstract class ResampleBase
         
     }
 
-    protected static void SplitWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, WaveOptions waveOptions)
+    protected static void SplitWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, ResampleOptions resampleOptions)
     {
-        var splitDuration = TimeSpan.FromSeconds(waveOptions.SplitDuration ?? 10);
+        var splitDuration = TimeSpan.FromSeconds(resampleOptions.SplitDuration ?? 10);
         var maxSplitCount = (int)Math.Ceiling(reader.TotalTime.TotalSeconds / splitDuration.TotalSeconds);
-        var splitCount = Math.Min(waveOptions.SplitCount ?? maxSplitCount, maxSplitCount);
+        var splitCount = Math.Min(resampleOptions.SplitCount ?? maxSplitCount, maxSplitCount);
 
         for (var count = 0; count < splitCount; count++)
         {
             var extension = Path.GetExtension(outputFileName);
             var splitFileName = outputFileName.Replace(extension, $"_{count}{extension}");
-            WriteWaveFile(inputFileName, splitFileName, reader, waveOptions, splitDuration);
+            WriteWaveFile(inputFileName, splitFileName, reader, resampleOptions, splitDuration);
             if (!reader.HasData()) break;
         }
     }
 
-    protected static void WriteWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, WaveOptions waveOptions, TimeSpan? duration = null)
+    protected static void WriteWaveFile(string inputFileName, string outputFileName, AudioFileReader reader, ResampleOptions resampleOptions, TimeSpan? duration = null)
     {
-        var sampleProvider = GetResamplingProvider(reader, waveOptions);
+        var sampleProvider = GetResamplingProvider(reader, resampleOptions);
 
-        if (waveOptions.Trim)
+        if (resampleOptions.Trim)
         {
             var silenceDuration = reader.GetSilenceDuration();
             reader.Skip(silenceDuration);
 
-            if (waveOptions.Verbose)
+            if (resampleOptions.Verbose)
                 Console.WriteLine($"Skip silence of {silenceDuration.TotalMilliseconds} ms");
 
             if (!reader.HasData())
@@ -156,12 +159,12 @@ public abstract class ResampleBase
 
         Console.WriteLine($"{inputFileName} -> {outputFileName}");
 
-        if (!waveOptions.Verbose) return;
+        if (!resampleOptions.Verbose) return;
         
         PrintWaveFileFormat(outputFileName);
     }
 
-    private static ISampleProvider GetResamplingProvider(ISampleProvider reader, WaveOptions resampleOptions)
+    private static ISampleProvider GetResamplingProvider(ISampleProvider reader, CommonWaveOptions resampleOptions)
     {
         var resamplingSampleProvider = new WdlResamplingSampleProvider(reader, resampleOptions.SampleRate);
 
@@ -173,14 +176,14 @@ public abstract class ResampleBase
         return resamplingSampleProvider;
     }
 
-    protected static void ApplyNormalization(AudioFileReader reader, WaveOptions waveOptions)
+    protected static void ApplyNormalization(AudioFileReader reader, ResampleOptions resampleOptions)
     {
-        switch (waveOptions.Nomalization)
+        switch (resampleOptions.Nomalization)
         {
             case null:
                 return;
             case > 0:
-                Console.WriteLine($"Skip normalization, invalid db level {waveOptions.Nomalization.Value}, must be <= 0.");
+                Console.WriteLine($"Skip normalization, invalid db level {resampleOptions.Nomalization.Value}, must be <= 0.");
                 return;
         }
 
@@ -203,17 +206,17 @@ public abstract class ResampleBase
 
         if (maxSampleValue is > 0.0f and < 1.0f)
         {
-            var maxRequestedSampleValue = Math.Pow(10, waveOptions.Nomalization.Value / 20f);
+            var maxRequestedSampleValue = Math.Pow(10, resampleOptions.Nomalization.Value / 20f);
             var volumeFactor = (float)maxRequestedSampleValue / maxSampleValue;
                 
             reader.Volume = volumeFactor;
                 
-            if (waveOptions.Verbose)
-                Console.WriteLine($"Max sample value: {maxSampleValue}, {waveOptions.Nomalization.Value} dB = {maxRequestedSampleValue} -> set volume to {volumeFactor}");
+            if (resampleOptions.Verbose)
+                Console.WriteLine($"Max sample value: {maxSampleValue}, {resampleOptions.Nomalization.Value} dB = {maxRequestedSampleValue} -> set volume to {volumeFactor}");
         }
         else
         {
-            if (waveOptions.Verbose)
+            if (resampleOptions.Verbose)
                 Console.WriteLine($"Max sample value: {maxSampleValue}, do not normalize");
         }
     }

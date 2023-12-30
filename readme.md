@@ -1,12 +1,16 @@
 ﻿# Waver
-## Goal
 Waver is intended for resampling and converting wave files.
 Main purpose is preparing audio files for training KI such as rnnoise.
+
+Copyright 2023 by Wolfgang Wallhäuser.
+
 
 ## Usage
 Supported commands:
 
-### Analyze wav audio files
+### analyze
+Analyze wav audio files
+
 Example:
 
 `.\Waver.exe analyze -i C:\wav\in\*.wav`
@@ -76,4 +80,5 @@ Example:
 Options:
 - -i, --input: Required. Input directory or file(s). Examples: `"c:\test", "c:\test\*.raw", "c:\test\test.pcm"`
 - -o, --output: Required. Output filename. Examples: `"c:\test\test.pcm", "test.raw"`
+- -f, --force: Append existing file.
 
